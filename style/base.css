@@ -3,3 +3,18 @@
 
     https://jupyterlab.readthedocs.io/en/stable/developer/css.html
 */
+[data-command="jupyter-exam:submit"] {
+  background-color: #28a745; /* Green background */
+  color: white;
+  padding: 8px 16px;
+  font-size: 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+[data-command="jupyter-exam:submit"]:hover {
+  background-color: #218838; /* Darker green on hover */
+}
+[data-command="jupyter-exam:submit"] > .jp-ToolbarButtonComponent-label {
+  color: white;
+}

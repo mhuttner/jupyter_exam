@@ -8,6 +8,8 @@
   "jupyter.lab.toolbars": {
     "Notebook": [
       {
+        "icon": "ui-components:file-upload",
+        "label": "Submit Exam",
         "name": "jupyter-exam-submit",
         "command": "jupyter-exam:submit"
       }

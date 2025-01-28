@@ -1,4 +1,5 @@
 import json
+from re import sub
 import requests
 
 from jupyter_server.base.handlers import APIHandler
@@ -13,10 +14,23 @@ class RouteHandler(APIHandler):
             data = self.get_json_body()
             if not data:
                 raise ValueError("No data received")
-            user = self.get_current_user()
-            if not user:
-                raise ValueError("No user found")
-            self.finish(json.dumps({"data": data}))
+            user = self.current_user
+            sub = user.username
+            name = user.name
+            display_name = user.display_name
+
+            self.finish(
+                json.dumps(
+                    {
+                        "data": data,
+                        "user": {
+                            "sub": sub,
+                            "name": name,
+                            "display_name": display_name,
+                        },
+                    }
+                )
+            )
         except Exception as e:
             self.set_status(500)
             self.finish(json.dumps({"error": str(e)}))
