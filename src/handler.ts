@@ -2,14 +2,23 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { ServerConnection } from '@jupyterlab/services';
 
-/**
- * Call the API extension
- *
- * @param endPoint API REST end point for the extension
- * @param init Initial values for the request
- * @returns The response body interpreted as JSON
- */
-export async function requestAPI<T>(
+type UserInfo = {
+  name: string;
+  sub: string;
+};
+
+export async function userInfo(): Promise<UserInfo> {
+  return requestAPI<UserInfo>('user');
+}
+
+export async function submitNotebook(json: string): Promise<any> {
+  return requestAPI<any>('submit', {
+    body: json,
+    method: 'POST'
+  });
+}
+
+async function requestAPI<T>(
   endPoint = '',
   init: RequestInit = {}
 ): Promise<T> {

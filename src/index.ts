@@ -4,10 +4,11 @@ import {
 } from '@jupyterlab/application';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ICommandPalette } from '@jupyterlab/apputils';
+import { ICommandPalette, DOMUtils } from '@jupyterlab/apputils';
 import { INotebookTracker } from '@jupyterlab/notebook';
+import { Widget } from '@lumino/widgets';
 
-import { requestAPI } from './handler';
+import { submitNotebook, userInfo } from './handler';
 
 /**
  * Initialization data for the jupyter_exam extension.
@@ -28,10 +29,24 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     const { commands } = app;
 
+    const userNode = document.createElement('div');
+    userNode.textContent = '';
+    const userWidget = new Widget({ node: userNode });
+    userWidget.id = DOMUtils.createDomID();
+    userWidget.addClass('jp-UserWidget');
+    app.shell.add(userWidget, 'top', { rank: 1000 });
+
+    const submitNode = document.createElement('div');
+    submitNode.textContent = 'submit';
+    const submitWidget = new Widget({ node: submitNode });
+    submitWidget.id = DOMUtils.createDomID();
+    submitWidget.addClass('jp-SubmitWidget');
+    app.shell.add(submitWidget, 'top', { rank: 1000 });
+
     commands.addCommand('jupyter-exam:submit', {
       label: 'Submit Exam',
       caption: 'Submit the exam to the server',
-      execute: (args: any) => {
+      execute: () => {
         const current = nbtracker.currentWidget;
         if (!current) {
           console.error('No notebook is active');
@@ -39,23 +54,35 @@ const plugin: JupyterFrontEndPlugin<void> = {
         }
         const panel = current.content;
         const nbData = panel.model?.toJSON();
-        console.log(nbData);
-
-        console.log(JSON.stringify(args));
-        requestAPI<any>('submit', {
-          body: JSON.stringify({ notebook: nbData }),
-          method: 'POST'
-        })
+        submitNotebook(JSON.stringify(nbData))
           .then(data => {
-            console.log(data);
+            const { submission } = data;
+            const { createdAt, valid } = submission;
+            const date = new Date(createdAt).toLocaleString('de-DE');
+            if (!valid) {
+              submitWidget.node.textContent = 'Exam submissions are closed';
+              submitWidget.node.style.backgroundColor = '#1d293d';
+            } else {
+              submitWidget.node.textContent = `Submitted at ${date}`;
+              submitWidget.node.style.backgroundColor = '#006045';
+            }
           })
-          .catch(reason => {
-            console.error(
-              `The jupyter_exam server extension appears to be missing.\n${JSON.stringify(reason)}`
-            );
+          .catch(error => {
+            console.error('Failed to submit notebook:', error);
           });
       }
     });
+    commands.addCommand('jupyter-exam:status', {
+      label: 'Check Status',
+      caption: 'Check the status of the exam',
+      execute: () => {
+        userInfo().then(data => {
+          const { name, sub } = data;
+          userWidget.node.textContent = `Jupyter Exam: ${name} (${sub})`;
+        });
+      }
+    });
+
     palette.addItem({
       command: 'jupyter-exam:submit',
       category: 'Notebook Operations'
@@ -65,6 +92,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
       if (!nbPanel) {
         return;
       }
+      commands.execute('jupyter-exam:status');
+
       nbPanel.context.saveState.connect((_, state) => {
         if (state === 'completed') {
           commands.execute('jupyter-exam:submit');

@@ -5,22 +5,18 @@ except ImportError:
     # in editable mode with pip. It is highly recommended to install
     # the package from a stable release or in editable mode: https://pip.pypa.io/en/stable/topics/local-project-installs/#editable-installs
     import warnings
+
     warnings.warn("Importing 'jupyter_exam' outside a proper installation.")
     __version__ = "dev"
 from .handlers import setup_handlers
 
 
 def _jupyter_labextension_paths():
-    return [{
-        "src": "labextension",
-        "dest": "jupyter_exam"
-    }]
+    return [{"src": "labextension", "dest": "jupyter_exam"}]
 
 
 def _jupyter_server_extension_points():
-    return [{
-        "module": "jupyter_exam"
-    }]
+    return [{"module": "jupyter_exam"}]
 
 
 def _load_jupyter_server_extension(server_app):
