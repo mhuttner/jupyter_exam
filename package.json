@@ -1,6 +1,6 @@
 {
   "name": "jupyter_exam",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "A JupyterLab extension to collect exam files",
   "keywords": [
     "jupyter",
@@ -27,7 +27,7 @@
   "style": "style/index.css",
   "repository": {
     "type": "git",
-    "url": "none.git"
+    "url": "git+https://github.com/mhuttner/jupyter_exam.git"
   },
   "scripts": {
     "build": "npm run build:lib && npm run build:labextension:dev",

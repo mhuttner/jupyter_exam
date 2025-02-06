@@ -54,6 +54,17 @@ const plugin: JupyterFrontEndPlugin<void> = {
         }
         const panel = current.content;
         const nbData = panel.model?.toJSON();
+        if (!nbData) {
+          console.error('Failed to get notebook data');
+          return;
+        }
+        const data = nbData as { metadata: { exam?: boolean } };
+        if (!data.metadata || !data.metadata.exam) {
+          // Not an exam notebook
+          console.log('Not an exam notebook. Skipping submission.');
+          return;
+        }
+
         submitNotebook(JSON.stringify(nbData))
           .then(data => {
             const { submission } = data;
@@ -77,10 +88,15 @@ const plugin: JupyterFrontEndPlugin<void> = {
       caption: 'Check the status of the exam',
       execute: () => {
         userInfo().then(data => {
-          const { name, sub } = data;
-          userWidget.node.textContent = `Jupyter Exam: ${name} (${sub})`;
+          const { name, sub, display_name } = data;
+          userWidget.node.textContent = `Jupyter Exam: ${display_name},  ${name} (${sub})`;
         });
       }
+    });
+
+    palette.addItem({
+      command: 'jupyter-exam:status',
+      category: 'Notebook Operations'
     });
 
     palette.addItem({

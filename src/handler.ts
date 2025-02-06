@@ -5,6 +5,7 @@ import { ServerConnection } from '@jupyterlab/services';
 type UserInfo = {
   name: string;
   sub: string;
+  display_name: string;
 };
 
 export async function userInfo(): Promise<UserInfo> {
